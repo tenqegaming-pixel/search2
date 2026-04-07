@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordEngine Ultra - Chrome Edition</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --chrome-bg: #202124;
+            --chrome-toolbar: #35363a;
+            --chrome-tab: #35363a;
+            --chrome-tab-active: #202124;
+            --chrome-border: #5f6368;
+            --chrome-text: #e8eaed;
+            --chrome-text-secondary: #9aa0a6;
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --bg-main: #0a0a0f;
+            --bg-card: #13131a;
+            --bg-hover: #1e1e2a;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --border: rgba(139, 92, 246, 0.25);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #121212;
+            color: var(--chrome-text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .browser-frame {
+            max-width: 1400px;
+            margin: 20px auto;
+            background: var(--chrome-bg);
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            overflow: hidden;
+            border: 1px solid #3c4043;
+        }
+
+        .window-titlebar {
+            background: var(--chrome-toolbar);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #3c4043;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .window-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .close { background: #ff5f56; }
+        .minimize { background: #ffbd2e; }
+        .maximize { background: #27c93f; }
+
+        .tab-strip {
+            display: flex;
+            background: var(--chrome-toolbar);
+            padding: 0 8px;
+            gap: 4px;
+            border-bottom: 1px solid #3c4043;
+        }
+
+        .tab {
+            padding: 10px 24px;
+            background: var(--chrome-tab);
+            border-radius: 8px 8px 0 0;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: var(--chrome-text-secondary);
+            max-width: 200px;
+            position: relative;
+        }
+
+        .tab.active {
+            background: var(--chrome-bg);
+            color: var(--chrome-text);
+        }
+
+        .tab-close {
+            margin-left: 8px;
+            opacity: 0.7;
+        }
+
+        .tab-close:hover { opacity: 1; }
+
+        .new-tab-btn {
+            padding: 8px 12px;
+            cursor: pointer;
+            color: var(--chrome-text-secondary);
+            font-size: 1.2rem;
+        }
+
+        .toolbar {
+            background: var(--chrome-bg);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #3c4043;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            color: var(--chrome-text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .nav-btn:hover { background: rgba(255,255,255,0.1); }
+
+        .address-bar {
+            flex: 1;
+            background: #303134;
+            border: 1px solid #5f6368;
+            border-radius: 20px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--chrome-text);
+            font-size: 0.9rem;
+        }
+
+        .address-bar input {
+            background: transparent;
+            border: none;
+            color: var(--chrome-text);
+            flex: 1;
+            outline: none;
+            font-size: 0.95rem;
+        }
+
+        .security-icon { color: var(--chrome-green); }
+
+        .viewport {
+            background: var(--bg-main);
+            min-height: 800px;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .viewport::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .viewport::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        .viewport::-webkit-scrollbar-thumb {
+            background: #5f6368;
+            border-radius: 6px;
+            border: 3px solid var(--bg-main);
+        }
+
+        /* Original App Styles */
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 30px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff 0%, #c084fc 50%, #f472b6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .search-wrapper {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 18px 130px 18px 24px;
+            font-size: 1.1rem;
+            border: 2px solid var(--border);
+            border-radius: 50px;
+            background: var(--bg-card);
+            color: white;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 11px 26px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 28px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-50%) scale(1.05);
+            box-shadow: 0 5px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .random-btn-inline {
+            position: absolute;
+            right: 110px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 10px 18px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.88rem;
+        }
+
+        .random-btn-inline:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .loading.active { display: block; }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .results { display: none; }
+        .results.active { 
+            display: block; 
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .word-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 30px;
+            background: linear-gradient(135deg, var(--bg-card), rgba(139, 92, 246, 0.08));
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .word-title {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #8b5cf6, #c084fc, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            word-break: break-word;
+        }
+
+        .word-phonetic {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin-bottom: 8px;
+        }
+
+        .word-meta {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .meta-badge {
+            padding: 6px 14px;
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .audio-btn {
+            background: var(--primary);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: white;
+            transition: all 0.3s ease;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+
+        .audio-btn:hover { transform: scale(1.1); }
+
+        .tabs-nav {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding: 8px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) transparent;
+        }
+
+        .tab-btn {
+            padding: 11px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .tab-btn:hover {
+            background: var(--bg-hover);
+            color: white;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+        }
+
+        .tab-icon { margin-right: 6px; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .definition-item {
+            margin-bottom: 14px;
+            padding-left: 14px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .pos-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            background: rgba(139, 92, 246, 0.2);
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .definition-text {
+            color: var(--text-secondary);
+            line-height: 1.65;
+            font-size: 0.98rem;
+        }
+
+        .example-text {
+            font-style: italic;
+            color: var(--text-secondary);
+            margin-top: 6px;
+            padding-left: 12px;
+            border-left: 2px solid var(--border);
+            font-size: 0.92rem;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .image-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+        }
+
+        .image-item:hover {
+            transform: scale(1.03);
+            z-index: 10;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .image-item:hover img { transform: scale(1.1); }
+
+        .image-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 15px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .image-item:hover .image-overlay { opacity: 1; }
+
+        .image-caption {
+            font-size: 0.85rem;
+            color: white;
+            font-weight: 500;
+        }
+
+        .gif-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .gif-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .gif-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .gif-item img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+
+        .gif-title {
+            padding: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 15px;
+        }
+
+        .media-card {
+            background: var(--bg-hover);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+
+        .media-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .media-image {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            display: block;
+        }
+
+        .media-info { padding: 14px; }
+
+        .quote-item, .slang-item {
+            padding: 16px;
+            background: rgba(139, 92, 246, 0.06);
+            border-left: 3px solid var(--primary);
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-style: italic;
+            line-height: 1.6;
+        }
+
+        .slang-item {
+            border-left-color: #ec4899;
+            background: rgba(236, 72, 153, 0.06);
+        }
+
+        .quote-author {
+            display: block;
+            margin-top: 8px;
+            font-style: normal;
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.88rem;
+        }
+
+        .slang-definition {
+            font-size: 0.98rem;
+            margin-bottom: 8px;
+            font-style: normal;
+        }
+
+        .slang-example {
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .slang-meta {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+        }
+
+        .word-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .word-tag {
+            padding: 7px 14px;
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .word-tag:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 16px;
+        }
+
+        .error-message {
+            display: none;
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .error-message.active { display: block; }
+
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 99999;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .lightbox.active { display: flex; }
+
+        .lightbox img {
+            max-width: 90vw;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: white;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .lightbox-close:hover {
+            background: #ef4444;
+            border-color: #ef4444;
+        }
+
+        @media (max-width: 768px) {
+            .browser-frame { margin: 0; border-radius: 0; }
+            .hero h1 { font-size: 2rem; }
+            .word-title { font-size: 2.2rem; }
+            .app-container { padding: 30px 16px; }
+            .tab-btn { padding: 10px 16px; font-size: 0.85rem; }
+            .grid-2 { grid-template-columns: 1fr; }
+            .image-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="browser-frame">
+    <div class="window-titlebar">
+        <div class="window-controls">
+            <div class="window-btn close"></div>
+            <div class="window-btn minimize"></div>
+            <div class="window-btn maximize"></div>
+        </div>
+        <div style="margin-left: 20px; font-size: 0.85rem; color: #9aa0a6;">WordEngine Ultra</div>
+    </div>
+
+    <div class="tab-strip">
+        <div class="tab active">
+            <span>🔍</span>
+            <span id="tabTitle">New Tab</span>
+            <span class="tab-close">×</span>
+        </div>
+        <div class="new-tab-btn">+</div>
+    </div>
+
+    <div class="toolbar">
+        <div class="nav-buttons">
+            <button class="nav-btn">←</button>
+            <button class="nav-btn">→</button>
+            <button class="nav-btn">↻</button>
+        </div>
+        <div class="address-bar">
+            <span class="security-icon">🔒</span>
+            <input type="text" id="urlBar" value="wordengine://search" readonly>
+            <span>⭐</span>
+        </div>
+        <div class="nav-buttons">
+            <button class="nav-btn">⋮</button>
+        </div>
+    </div>
+
+    <div class="viewport" id="viewport">
+        <div class="app-container">
+            <section class="hero">
+                <h1>⚡ WordEngine Ultra</h1>
+                <p>Search literally anything—real words, made-up words, phrases, symbols. No restrictions. Maximum results.</p>
+                
+                <div class="search-wrapper">
+                    <input type="text" class="search-box" id="searchInput" placeholder="Search anything..." autocomplete="off">
+                    <button class="random-btn-inline" id="randomBtn" title="Random">🎲</button>
+                    <button class="search-btn" id="searchBtn">Search</button>
+                </div>
+            </section>
+
+            <div class="loading" id="loading">
+                <div class="loader"></div>
+                <p style="color: var(--text-secondary);">Searching Wikipedia, Wikimedia, Giphy, Reddit, APIs...</p>
+            </div>
+
+            <div class="error-message" id="errorMessage">
+                <h2 style="color:#ef4444;font-size:1.8rem;margin-bottom:10px;">😕 Not Found</h2>
+                <p>Try another term!</p>
+            </div>
+
+            <div class="results" id="results">
+                
+                <div class="word-header" id="wordHeader">
+                    <div class="word-title" id="wordTitle"></div>
+                    <div class="word-phonetic" id="wordPhonetic"></div>
+                    <div class="word-meta" id="wordMeta"></div>
+                </div>
+
+                <div class="tabs-nav" id="tabsNav">
+                    <button class="tab-btn active" data-tab="overview"><span class="tab-icon">📊</span> Overview</button>
+                    <button class="tab-btn" data-tab="dictionary"><span class="tab-icon">📖</span> Dictionary</button>
+                    <button class="tab-btn" data-tab="images"><span class="tab-icon">🖼️</span> Images</button>
+                    <button class="tab-btn" data-tab="videos"><span class="tab-icon">🎬</span> Videos</button>
+                    <button class="tab-btn" data-tab="gifs"><span class="tab-icon">🎞️</span> GIFs</button>
+                    <button class="tab-btn" data-tab="related"><span class="tab-icon">🔗</span> Related</button>
+                    <button class="tab-btn" data-tab="quotes"><span class="tab-icon">💬</span> Quotes</button>
+                    <button class="tab-btn" data-tab="slang"><span class="tab-icon">😎</span> Slang</button>
+                    <button class="tab-btn" data-tab="social"><span class="tab-icon">📱</span> Social</button>
+                    <button class="tab-btn" data-tab="music"><span class="tab-icon">🎵</span> Music</button>
+                    <button class="tab-btn" data-tab="movies"><span class="tab-icon">🎥</span> Movies</button>
+                    <button class="tab-btn" data-tab="books"><span class="tab-icon">📚</span> Books</button>
+                    <button class="tab-btn" data-tab="fun"><span class="tab-icon">🤣</span> Fun Stuff</button>
+                </div>
+
+                <div id="tab-overview" class="tab-content active"><div class="grid-2" id="overviewContent"></div></div>
+                <div id="tab-dictionary" class="tab-content"><div id="dictionaryContent"></div></div>
+                <div id="tab-images" class="tab-content"><div id="imagesContent"></div></div>
+                <div id="tab-videos" class="tab-content"><div id="videosContent"></div></div>
+                <div id="tab-gifs" class="tab-content"><div id="gifsContent"></div></div>
+                <div id="tab-related" class="tab-content"><div id="relatedContent"></div></div>
+                <div id="tab-quotes" class="tab-content"><div id="quotesContent"></div></div>
+                <div id="tab-slang" class="tab-content"><div id="slangContent"></div></div>
+                <div id="tab-social" class="tab-content"><div id="socialContent"></div></div>
+                <div id="tab-music" class="tab-content"><div id="musicContent"></div></div>
+                <div id="tab-movies" class="tab-content"><div id="moviesContent"></div></div>
+                <div id="tab-books" class="tab-content"><div id="booksContent"></div></div>
+                <div id="tab-fun" class="tab-content"><div id="funContent"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+    <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    <img src="" alt="" id="lightboxImg">
+</div>
+
+<script>
+let currentWord = '';
+let allData = {};
+
+const randomWords = [
+    'serendipity', 'ephemeral', 'luminous', 'quantum', 'phoenix',
+    'wanderlust', 'cosmos', 'nebula', 'galaxy', 'aurora',
+    'dragon', 'ocean', 'mountain', 'forest', 'butterfly',
+    'volcano', 'castle', 'rainbow', 'thunderstorm', 'earthquake',
+    'love', 'adventure', 'freedom', 'infinity', 'mystery',
+    'fire', 'ice', 'storm', 'star', 'moon', 'sun', 'dream',
+    'magic', 'power', 'time', 'space', 'universe'
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('searchBtn').addEventListener('click', searchWord);
+    document.getElementById('randomBtn').addEventListener('click', getRandomWord);
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchWord();
+    });
+
+    document.getElementById('tabsNav').addEventListener('click', (e) => {
+        const btn = e.target.closest('.tab-btn');
+        if (!btn) return;
+        
+        e.preventDefault();
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tabName = btn.getAttribute('data-tab');
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        const targetTab = document.getElementById(`tab-${tabName}`);
+        if (targetTab) targetTab.classList.add('active');
+    });
+
+    // Update address bar on scroll
+    document.getElementById('viewport').addEventListener('scroll', () => {
+        if (currentWord) {
+            document.getElementById('urlBar').value = `wordengine://search/${encodeURIComponent(currentWord)}`;
+        }
+    });
+});
+
+function getRandomWord() {
+    const word = randomWords[Math.floor(Math.random() * randomWords.length)];
+    document.getElementById('searchInput').value = word;
+    searchWord();
+}
+
+function closeLightbox(e) {
+    if (e && e.target !== e.currentTarget && !e.target.closest('.lightbox-close')) return;
+    document.getElementById('lightbox').classList.remove('active');
+}
+
+function openLightbox(url) {
+    document.getElementById('lightboxImg').src = url;
+    document.getElementById('lightbox').classList.add('active');
+}
+
+function searchRelated(word) {
+    document.getElementById('searchInput').value = word;
+    searchWord();
+}
+
+async function searchWord() {
+    currentWord = document.getElementById('searchInput').value.trim();
+    
+    // NO VALIDATION - Accept anything
+    if (!currentWord) currentWord = "random";
+
+    // Update Chrome UI
+    document.getElementById('tabTitle').textContent = currentWord.substring(0, 20) + (currentWord.length > 20 ? '...' : '');
+    document.getElementById('urlBar').value = `wordengine://search/${encodeURIComponent(currentWord)}`;
+    
+    document.getElementById('loading').classList.add('active');
+    document.getElementById('results').classList.remove('active');
+    document.getElementById('errorMessage').classList.remove('active');
+
+    try {
+        const results = await Promise.allSettled([
+            fetchDictionary(),
+            fetchWikipediaImages(),
+            fetchDatamuse(),
+            fetchUrbanDictionary(),
+            fetchQuotes(),
+            fetchGifs(),
+            fetchITunes(),
+            fetchOMDb(),
+            fetchOpenLibrary(),
+            fetchReddit(),
+            fetchDadJoke(),
+            fetchAdvice(),
+            fetchBored(),
+            fetchKanyeQuote(),
+            fetchChuckNorris()
+        ]);
+
+        allData = {
+            dictionary: results[0].status === 'fulfilled' ? results[0].value : null,
+            images: results[1].status === 'fulfilled' ? results[1].value : [],
+            datamuse: results[2].status === 'fulfilled' ? results[2].value : null,
+            urban: results[3].status === 'fulfilled' ? results[3].value : null,
+            quotes: results[4].status === 'fulfilled' ? results[4].value : [],
+            giphy: results[5].status === 'fulfilled' ? results[5].value : [],
+            itunes: results[6].status === 'fulfilled' ? results[6].value || [] : [],
+            omdb: results[7].status === 'fulfilled' ? results[7].value : null,
+            books: results[8].status === 'fulfilled' ? results[8].value : [],
+            reddit: results[9].status === 'fulfilled' ? results[9].value : null,
+            dadJoke: results[10].status === 'fulfilled' ? results[10].value : null,
+            advice: results[11].status === 'fulfilled' ? results[11].value : null,
+            bored: results[12].status === 'fulfilled' ? results[12].value : null,
+            kanye: results[13].status === 'fulfilled' ? results[13].value : null,
+            chucknorris: results[14].status === 'fulfilled' ? results[14].value : null
+        };
+
+        displayResults();
+    } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('loading').classList.remove('active');
+        document.getElementById('errorMessage').classList.add('active');
+    }
+}
+
+function displayResults() {
+    document.getElementById('loading').classList.remove('active');
+    document.getElementById('results').classList.add('active');
+
+    updateWordHeader();
+    populateOverviewTab();
+    populateDictionaryTab();
+    populateImagesTab();
+    populateVideosTab();
+    populateGifsTab();
+    populateRelatedTab();
+    populateQuotesTab();
+    populateSlangTab();
+    populateSocialTab();
+    populateMusicTab();
+    populateMoviesTab();
+    populateBooksTab();
+    populateFunTab();
+
+    document.getElementById('wordHeader').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function updateWordHeader() {
+    let phonetic = '';
+    if (allData.dictionary?.phonetics?.[0]?.text) phonetic = allData.dictionary.phonetics[0].text;
+    
+    let audioUrl = '';
+    if (allData.dictionary?.phonetics) {
+        audioUrl = allData.dictionary.phonetics.find(p => p.audio)?.audio || '';
+    }
+
+    document.getElementById('wordTitle').textContent = currentWord;
+    document.getElementById('wordPhonetic').textContent = phonetic;
+
+    let metaHtml = `<span class="meta-badge">${currentWord.length} chars</span>`;
+    if (allData.dictionary?.meanings?.[0]?.partOfSpeech) {
+        metaHtml += `<span class="meta-badge">${allData.dictionary.meanings[0].partOfSpeech}</span>`;
+    }
+    if (audioUrl) {
+        metaHtml += `<button class="audio-btn" onclick="playAudio('${audioUrl}')">🔊</button>`;
+    }
+    
+    document.getElementById('wordMeta').innerHTML = metaHtml;
+}
+
+function playAudio(url) {
+    new Audio(url).play().catch(() => {});
+}
+
+function populateOverviewTab() {
+    const c = document.getElementById('overviewContent');
+    let html = '';
+
+    if (allData.dictionary?.meanings?.[0]?.definitions?.[0]) {
+        const def = allData.dictionary.meanings[0].definitions[0];
+        html += `
+            <div class="card">
+                <div class="card-title"><span class="icon">📖</span> Quick Definition</div>
+                <div class="definition-item">
+                    <span class="pos-tag">${allData.dictionary.meanings[0].partOfSpeech}</span>
+                    <div class="definition-text">${def.definition}</div>
+                    ${def.example ? `<div class="example-text">"${def.example}"</div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    html += `
+        <div class="card">
+            <div class="card-title"><span class="icon">📊</span> Query Stats</div>
+            <div class="definition-text">
+                <p><strong>Input:</strong> "${currentWord}"</p>
+                <p><strong>Length:</strong> ${currentWord.length} characters</p>
+                <p><strong>Wikipedia Images:</strong> ${allData.images.filter(i => i.source === 'Wikipedia' || i.source === 'Wikimedia').length} found</p>
+                <p><strong>Total Images:</strong> ${allData.images.length}</p>
+                <p><strong>GIFs:</strong> ${allData.giphy.length} found</p>
+                <p><strong>Songs:</strong> ${allData.itunes.length} found</p>
+                <p><strong>Books:</strong> ${allData.books.length} found</p>
+                <p><strong>Reddit Posts:</strong> ${allData.reddit?.data?.children?.length || 0} found</p>
+            </div>
+        </div>
+    `;
+
+    c.innerHTML = html || '<div class="no-results">No overview data</div>';
+}
+
+function populateDictionaryTab() {
+    const c = document.getElementById('dictionaryContent');
+    if (!allData.dictionary) { 
+        c.innerHTML = '<div class="no-results">❌ No dictionary definition found (this may not be a standard English word)</div>'; 
+        return; 
+    }
+
+    let html = '';
+    allData.dictionary.meanings.forEach(meaning => {
+        meaning.definitions.slice(0, 5).forEach((def, idx) => {
+            html += `
+                <div class="card">
+                    <div class="definition-item">
+                        <span class="pos-tag">${meaning.partOfSpeech} ${idx + 1}</span>
+                        <div class="definition-text">${def.definition}</div>
+                        ${def.example ? `<div class="example-text">"${def.example}"</div>` : ''}
+                    </div>
+                    ${def.synonyms?.length > 0 ? `<div style="margin-top:12px;"><strong>Synonyms:</strong></div><div class="word-tags">${def.synonyms.slice(0, 10).map(s => `<span class="word-tag" onclick="searchRelated('${s}')">${s}</span>`).join('')}</div>` : ''}
+                    ${def.antonyms?.length > 0 ? `<div style="margin-top:10px;"><strong>Antonyms:</strong></div><div class="word-tags">${def.antonyms.slice(0, 10).map(a => `<span class="word-tag" onclick="searchRelated('${a}')">${a}</span>`).join('')}</div>` : ''}
+                </div>
+            `;
+        });
+    });
+    c.innerHTML = html;
+}
+
+// ==================== REAL WIKIPEDIA IMAGES ====================
+async function fetchWikipediaImages() {
+    const images = [];
+    
+    try {
+        // 1. Get main article image
+        const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(currentWord)}`);
+        if (summaryRes.ok) {
+            const summary = await summaryRes.json();
+            if (summary.thumbnail?.source) {
+                images.push({
+                    url: summary.thumbnail.source.replace(/\/\d+px-/, '/800px-'),
+                    title: summary.title,
+                    source: 'Wikipedia',
+                    description: summary.description || 'Article thumbnail'
+                });
+            }
+        }
+
+        // 2. Get all images from the page
+        const parseRes = await fetch(`https://en.wikipedia.org/w/api.php?action=parse&page=${encodeURIComponent(currentWord)}&prop=images&format=json&origin=*`);
+        if (parseRes.ok) {
+            const parseData = await parseRes.json();
+            if (parseData.parse?.images) {
+                const imageFiles = parseData.parse.images
+                    .filter(filename => 
+                        /\.(jpg|jpeg|png|gif)$/i.test(filename) && 
+                        !filename.toLowerCase().includes('icon') &&
+                        !filename.toLowerCase().includes('logo')
+                    )
+                    .slice(0, 15);
+
+                for (const filename of imageFiles) {
+                    try {
+                        const imageInfoRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=File:${encodeURIComponent(filename)}&prop=imageinfo&iiprop=url|extmetadata&format=json&origin=*`);
+                        if (imageInfoRes.ok) {
+                            const imageData = await imageInfoRes.json();
+                            const pages = imageData.query?.pages;
+                            if (pages) {
+                                const page = Object.values(pages)[0];
+                                if (page.imageinfo?.[0]?.url) {
+                                    images.push({
+                                        url: page.imageinfo[0].url,
+                                        title: filename.replace(/_/g, ' ').replace(/\.[^/.]+$/, ""),
+                                        source: 'Wikimedia',
+                                        description: 'From article'
+                                    });
+                                }
+                            }
+                        }
+                    } catch (e) {}
+                }
+            }
+        }
+
+        // 3. Search Wikimedia Commons
+        const commonsRes = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(currentWord)}+filetype:bitmap|drawing&srnamespace=6&srlimit=10&format=json&origin=*`);
+        if (commonsRes.ok) {
+            const commonsData = await commonsRes.json();
+            if (commonsData.query?.search) {
+                for (const item of commonsData.query.search) {
+                    const filename = item.title.replace('File:', '');
+                    const directUrl = `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}?width=800`;
+                    
+                    images.push({
+                        url: directUrl,
+                        title: filename.replace(/_/g, ' ').replace(/\.[^/.]+$/, ""),
+                        source: 'Wikimedia Commons',
+                        description: item.snippet?.replace(/<\/?span[^>]*>/g, '') || 'Commons image'
+                    });
+                }
+            }
+        }
+
+    } catch (e) { console.log('Wiki images error:', e); }
+    
+    // Remove duplicates
+    const uniqueImages = [];
+    const seenUrls = new Set();
+    for (const img of images) {
+        if (!seenUrls.has(img.url)) {
+            seenUrls.add(img.url);
+            uniqueImages.push(img);
+        }
+    }
+    
+    return uniqueImages.slice(0, 24);
+}
+
+function populateImagesTab() {
+    const c = document.getElementById('imagesContent');
+    
+    if (!allData.images || allData.images.length === 0) {
+        c.innerHTML = `
+            <div class="no-results">
+                <p>🖼️ No Wikipedia images found for "${currentWord}"</p>
+                <p style="font-size: 0.9rem; margin-top: 10px;">Try searching for a more common term, proper noun, or Wikipedia article title.</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '<div class="image-grid">';
+    
+    allData.images.forEach((img) => {
+        html += `
+            <div class="image-item" onclick="openLightbox('${img.url}')" title="${img.description || img.title}">
+                <img src="${img.url}" 
+                     loading="lazy" 
+                     alt="${img.title}"
+                     onerror="this.parentElement.style.display='none'">
+                <div class="image-overlay">
+                    <div class="image-caption" style="font-size: 0.75rem; color: #aaa; text-transform: uppercase;">${img.source}</div>
+                    <div class="image-caption">${img.title}</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    
+    html += `
+        <div style="margin-top: 20px; text-align: center; color: #666; font-size: 0.85rem;">
+            📚 Images sourced from Wikipedia & Wikimedia Commons • Click to enlarge
+        </div>
+    `;
+    
+    c.innerHTML = html;
+}
+
+// ==================== REAL GIFS ====================
+async function fetchGifs() {
+    const gifs = [];
+    
+    try {
+        const giphyRes = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&q=${encodeURIComponent(currentWord)}&limit=25&rating=g`);
+        if (giphyRes.ok) {
+            const data = await giphyRes.json();
+            if (data.data && data.data.length > 0) {
+                return data.data.map(g => ({
+                    title: g.title || currentWord,
+                    url: g.url,
+                    preview: g.images?.fixed_height?.url || g.images?.original?.url,
+                    source: 'Giphy'
+                }));
+            }
+        }
+    } catch(e) {}
+
+    try {
+        const tenorRes = await fetch(`https://g.tenor.com/v1/search?q=${encodeURIComponent(currentWord)}&key=LIVDSRZULELA&limit=20`);
+        if (tenorRes.ok) {
+            const data = await tenorRes.json();
+            if (data.results && data.results.length > 0) {
+                return data.results.map(g => ({
+                    title: g.title || currentWord,
+                    url: g.itemurl || g.url,
+                    preview: g.media?.[0]?.gif?.url || g.media?.[0]?.tinygif?.url,
+                    source: 'Tenor'
+                }));
+            }
+        }
+    } catch(e) {}
+
+    return gifs;
+}
+
+function populateVideosTab() {
+    const c = document.getElementById('videosContent');
+    c.innerHTML = `
+        <div class="card">
+            <div class="card-title"><span class="icon">📺</span> YouTube Videos</div>
+            <p style="margin-bottom: 15px; color: var(--text-secondary);">Watch videos about "${currentWord}" on YouTube</p>
+            <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(currentWord)}" 
+               target="_blank" 
+               style="display: inline-block; padding: 12px 24px; background: #ff0000; color: white; text-decoration: none; border-radius: 8px; font-weight: 600;">
+               ▶ Search "${currentWord}" on YouTube
+            </a>
+        </div>
+        <div class="card" style="margin-top: 20px;">
+            <div class="card-title"><span class="icon">🎬</span> Video Clips</div>
+            <p style="color: var(--text-secondary);">Check the GIFs tab for short animated clips related to ${currentWord}</p>
+        </div>
+    `;
+}
+
+function populateGifsTab() {
+    const c = document.getElementById('gifsContent');
+    if (!allData.giphy || allData.giphy.length === 0) {
+        c.innerHTML = '<div class="no-results">🎞️ No GIFs found. Try a different search term!</div>';
+        return;
+    }
+
+    let html = '<div class="gif-grid">';
+    allData.giphy.slice(0, 20).forEach(gif => {
+        html += `
+            <div class="gif-item" onclick="window.open('${gif.url}', '_blank')">
+                <img src="${gif.preview}" loading="lazy" alt="${gif.title}">
+                <div class="gif-title">${gif.title || 'GIF'}</div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    c.innerHTML = html;
+}
+
+function populateRelatedTab() {
+    const c = document.getElementById('relatedContent');
+    let html = '';
+    
+    if (allData.datamuse?.rhymes?.length > 0) {
+        html += `<div class="card"><div class="card-title"><span class="icon">🎵</span> Rhymes</div><div class="word-tags">${allData.datamuse.rhymes.slice(0, 15).map(r => `<span class="word-tag" onclick="searchRelated('${r.word}')">${r.word}</span>`).join('')}</div></div>`;
+    }
+    
+    if (allData.datamuse?.similar?.length > 0) {
+        html += `<div class="card"><div class="card-title"><span class="icon">💭</span> Similar Meaning</div><div class="word-tags">${allData.datamuse.similar.slice(0, 15).map(s => `<span class="word-tag" onclick="searchRelated('${s.word}')">${s.word}</span>`).join('')}</div></div>`;
+    }
+    
+    if (allData.datamuse?.soundsLike?.length > 0) {
+        html += `<div class="card"><div class="card-title"><span class="icon">👂</span> Sounds Like</div><div class="word-tags">${allData.datamuse.soundsLike.slice(0, 15).map(s => `<span class="word-tag" onclick="searchRelated('${s.word}')">${s.word}</span>`).join('')}</div></div>`;
+    }
+
+    if (html === '') {
+        html = '<div class="no-results">🔗 No related words found</div>';
+    }
+    
+    c.innerHTML = html;
+}
+
+function populateQuotesTab() {
+    const c = document.getElementById('quotesContent');
+    if (!allData.quotes || allData.quotes.length === 0) { 
+        c.innerHTML = '<div class="no-results">💬 No quotes found</div>'; 
+        return; 
+    }
+
+    c.innerHTML = allData.quotes.slice(0, 10).map(q => 
+        `<div class="quote-item">"${q.quote}"<span class="quote-author">— ${q.author}</span></div>`
+    ).join('');
+}
+
+function populateSlangTab() {
+    const c = document.getElementById('slangContent');
+    if (!allData.urban || !allData.urban.list || allData.urban.list.length === 0) { 
+        c.innerHTML = '<div class="no-results">😎 No slang definitions found</div>'; 
+        return; 
+    }
+
+    c.innerHTML = '<div style="margin-bottom:15px;color:var(--text-secondary);font-size:0.95rem;">🔥 From Urban Dictionary:</div>' + 
+        allData.urban.list.slice(0, 6).map(item => `
+            <div class="slang-item">
+                <div class="slang-definition">${item.definition}</div>
+                ${item.example ? `<div class="slang-example">"${item.example}"</div>` : ''}
+                <div class="slang-meta">
+                    <span>👍 ${item.thumbs_up || 0}</span>
+                    <span>✍️ ${item.author || 'Anonymous'}</span>
+                </div>
+            </div>
+        `).join('');
+}
+
+function populateSocialTab() {
+    const c = document.getElementById('socialContent');
+    if (!allData.reddit || !allData.reddit.data?.children) { 
+        c.innerHTML = '<div class="no-results">📱 No Reddit posts found</div>'; 
+        return; 
+    }
+
+    c.innerHTML = '<div style="margin-bottom:15px;color:var(--text-secondary);font-size:0.95rem;">📱 Recent Reddit Posts:</div>' + 
+        allData.reddit.data.children.slice(0, 10).map(post => {
+            const title = decodeHTML(post.data.title);
+            const selftext = post.data.selftext?.substring(0, 150);
+
+            return `
+                <div class="card" style="cursor:pointer;" onclick="window.open('https://reddit.com${post.data.permalink}', '_blank')">
+                    <div class="card-title"><span class="icon">💬</span> r/${post.data.subreddit}</div>
+                    <div style="font-weight:600;font-size:1rem;margin-bottom:8px;line-height:1.4;">${title}</div>
+                    ${selftext ? `<div style="color:var(--text-secondary);font-size:0.9rem;line-height:1.5;">"${selftext}..."</div>` : ''}
+                    <div style="display:flex;gap:12px;margin-top:10px;font-size:0.85rem;color:var(--text-secondary);">
+                        <span>▲ ${post.data.score}</span>
+                        <span>💬 ${post.data.num_comments} comments</span>
+                        <span>u/${post.data.author}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+}
+
+function populateMusicTab() {
+    const c = document.getElementById('musicContent');
+    if (!allData.itunes || allData.itunes.length === 0) { 
+        c.innerHTML = '<div class="no-results">🎵 No songs found</div>'; 
+        return; 
+    }
+
+    c.innerHTML = '<div class="media-grid">' + allData.itunes.slice(0, 10).map(song => `
+        <div class="media-card" onclick="window.open('${song.trackViewUrl}', '_blank')">
+            <img src="${song.artworkUrl100}" class="media-image" alt="${song.trackName}">
+            <div class="media-info">
+                <div style="font-weight:600;">${song.trackName}</div>
+                <div style="color:#9aa0a6;font-size:0.9rem;">${song.artistName} • ${song.collectionName || 'Album'}</div>
+            </div>
+        </div>
+    `).join('') + '</div>';
+}
+
+function populateMoviesTab() {
+    const c = document.getElementById('moviesContent');
+    if (!allData.omdb) { 
+        c.innerHTML = '<div class="no-results">🎥 No movies found</div>'; 
+        return; 
+    }
+
+    const m = allData.omdb;
+    c.innerHTML = `
+        <div class="card" style="max-width:700px;margin:0 auto;">
+            <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center;">
+                <img src="${m.Poster}" alt="${m.Title}" style="width:180px;border-radius:12px;" onerror="this.src='https://via.placeholder.com/180x270?text=No+Poster'">
+                <div>
+                    <h2 style="font-size:1.6rem;margin-bottom:8px;">${m.Title}</h2>
+                    <p style="color:var(--text-secondary);"><strong>${m.Year}</strong> • ${m.Rated} • ${m.Runtime}</p>
+                    <p style="line-height:1.5;font-size:0.95rem;">${m.Plot?.substring(0, 250)}...</p>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+                        <span style="padding:6px 14px;background:rgba(99,102,241,0.15);border-radius:8px;font-size:0.82rem;">🎬 ${m.Genre}</span>
+                        <span style="padding:6px 14px;background:rgba(99,102,241,0.15);border-radius:8px;font-size:0.82rem;">🎭 ${m.Director}</span>
+                        <span style="padding:6px 14px;background:rgba(99,102,241,0.15);border-radius:8px;font-size:0.82rem;">⭐ ${m.imdbRating}/10</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function populateBooksTab() {
+    const c = document.getElementById('booksContent');
+    if (!allData.books || allData.books.length === 0) { 
+        c.innerHTML = '<div class="no-results">📚 No books found</div>'; 
+        return; 
+    }
+
+    c.innerHTML = '<div class="grid-2">' + allData.books.slice(0, 10).map(book => `
+        <div class="card" style="cursor:pointer;" onclick="window.open('https://openlibrary.org${book.key}','_blank')">
+            <div style="font-weight:600;font-size:1.05rem;margin-bottom:8px;">${book.title}</div>
+            <div style="color:var(--text-secondary);font-size:0.9rem;">by ${book.author_name?.join(', ') || 'Unknown'}</div>
+            <div style="display:flex;gap:10px;font-size:0.82rem;color:var(--text-secondary);margin-top:8px;">
+                <span>📖 ${book.first_publish_year || '?'}</span>
+                <span>📑 ${book.edition_count || '?'}</span>
+            </div>
+        </div>
+    `).join('') + '</div>';
+}
+
+function populateFunTab() {
+    const c = document.getElementById('funContent');
+    let html = '<div class="grid-2">';
+
+    if (allData.dadJoke) {
+        html += `<div class="card"><div class="card-title"><span class="icon">🤣</span> Dad Joke</div><p style="font-size:1.05rem;line-height:1.6;">${allData.dadJoke.joke}</p></div>`;
+    }
+
+    if (allData.advice) {
+        html += `<div class="card"><div class="card-title"><span class="icon">💡</span> Life Advice</div><p style="font-size:1.05rem;line-height:1.6;font-style:italic;">"${allData.advice.slip.advice}"</p></div>`;
+    }
+
+    if (allData.bored) {
+        html += `<div class="card"><div class="card-title"><span class="icon">🎯</span> Activity Suggestion</div><p style="font-size:1.05rem;"><strong>${allData.bored.activity}</strong></p><p style="color: var(--text-secondary);font-size:0.9rem;">Type: ${allData.bored.type} • Participants: ${allData.bored.participants || '?'}</p></div>`;
+    }
+
+    if (allData.kanye) {
+        html += `<div class="card"><div class="card-title"><span class="icon">🎤</span> Kanye Says</div><p style="font-size:1.1rem;font-style:italic;">"${allData.kanye.quote}"</p></div>`;
+    }
+
+    if (allData.chucknorris) {
+        html += `<div class="card"><div class="card-title"><span class="icon">💪</span> Chuck Norris Fact</div><p style="font-size:1.05rem;line-height:1.6;">${allData.chucknorris.value}</p></div>`;
+    }
+
+    html += '</div>';
+    c.innerHTML = html || '<div class="no-results">No fun stuff loaded</div>';
+}
+
+// API Functions
+async function fetchDictionary() {
+    try {
+        if (!/^[a-zA-Z]+$/.test(currentWord)) return null;
+        const r = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${currentWord}`);
+        if (!r.ok) return null;
+        const d = await r.json();
+        return d[0] || null;
+    } catch(e) { return null; }
+}
+
+async function fetchDatamuse() {
+    try {
+        const [rhy, sim, sl] = await Promise.all([
+            fetch(`https://api.datamuse.com/words?rel_rhy=${encodeURIComponent(currentWord)}&max=20`),
+            fetch(`https://api.datamuse.com/words?ml=${encodeURIComponent(currentWord)}&max=20`),
+            fetch(`https://api.datamuse.com/words?sl=${encodeURIComponent(currentWord)}&max=20`)
+        ]);
+        const [rhymes, similar, soundsLike] = await Promise.all([rhy.json(), sim.json(), sl.json()]);
+        return { rhymes, similar, soundsLike };
+    } catch(e) { return null; }
+}
+
+async function fetchUrbanDictionary() {
+    try {
+        const r = await fetch(`https://api.urbandictionary.com/v0/define?term=${encodeURIComponent(currentWord)}`);
+        if (!r.ok) return null;
+        return await r.json();
+    } catch(e) { return null; }
+}
+
+async function fetchQuotes() {
+    try {
+        const r = await fetch('https://zenquotes.io/api/quotes');
+        if (!r.ok) return [];
+        const d = await r.json();
+        return d.slice(0, 10).map(q => ({quote: q.q, author: q.a}));
+    } catch(e) { return []; }
+}
+
+async function fetchITunes() {
+    try {
+        const r = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(currentWord)}&media=music&limit=12`);
+        if (!r.ok) return [];
+        const d = await r.json();
+        return d.results;
+    } catch(e) { return []; }
+}
+
+async function fetchOMDb() {
+    try {
+        const r = await fetch(`http://www.omdbapi.com/?apikey=trilogy&t=${encodeURIComponent(currentWord)}`);
+        if (!r.ok) return null;
+        const d = await r.json();
+        if (d.Response === 'False') return null;
+        return d;
+    } catch(e) { return null; }
+}
+
+async function fetchOpenLibrary() {
+    try {
+        const r = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(currentWord)}&limit=12`);
+        if (!r.ok) return [];
+        const d = await r.json();
+        return d.docs || [];
+    } catch(e) { return []; }
+}
+
+async function fetchReddit() {
+    try {
+        const r = await fetch(`https://www.reddit.com/search.json?q=${encodeURIComponent(currentWord)}&sort=relevance&t=all&limit=12`);
+        if (!r.ok) return null;
+        return await r.json();
+    } catch(e) { return null; }
+}
+
+async function fetchDadJoke() {
+    try {
+        const r = await fetch('https://icanhazdadjoke.com/', {
+            headers: { 'Accept': 'application/json' }
+        });
+        if (!r.ok) return null;
+        return await r.json();
+    } catch(e) { return null; }
+}
+
+async function fetchAdvice() {
+    try {
+        const r = await fetch('https://api.adviceslip.com/advice');
+        if (!r.ok) return null;
+        return await r.json();
+    } catch(e) { return null; }
+}
+
+async function fetchBored() {
+    try {
+        const r = await fetch('https://www.boredapi.com/api/activity');
+        if (!r.ok) return null;
+        return await r.json();
+    } catch(e) { return null; }
+}
+
+async function fetchKanyeQuote() {
+    try {
+        const r = await fetch('https://api.kanye.rest/');
+        if (!r.ok) return null;
+        return await r.json();
+    } catch(e) { return null; }
+}
+
+async function fetchChuckNorris() {
+    try {
+        const r = await fetch('https://api.chucknorris.io/jokes/random');
+        if (!r.ok) return null;
+        return await r.json();
+    } catch(e) { return null; }
+}
+
+function capitalizeFirst(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+function decodeHTML(str) { 
+    if (!str) return '';
+    const t=document.createElement('textarea'); 
+    t.innerHTML=str; 
+    return t.value; 
+}
+</script>
+</body>
+</html>
